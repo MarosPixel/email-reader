@@ -1,4 +1,4 @@
-# ZoltanLaca/EmailReader
+# Fortuity/EmailReader
 
 > EmailReader provides fluent IMAP search API over the `barbushin/php-imap` package.
 

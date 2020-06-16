@@ -74,10 +74,11 @@ class Imap implements Credentials
 		int $port = 993,
 		string $encrypt = 'ssl',
 		string $folder = null,
-		string $encoding = 'UTF-8'
+		string $encoding = 'UTF-8',
+        bool $curlHack = false
 	)
 	{
-		if (!in_array($encrypt, [null, 'ssl', 'tls', 'notls'], true)) {
+		if (!in_array($encrypt, [null, 'ssl', 'tls', 'notls', 'ssl/novalidate-cert'], true)) {
 			throw new InvalidParameterException();
 		}
 
@@ -90,14 +91,19 @@ class Imap implements Credentials
 		$this->encoding = $encoding;
 
 		try {
-			$this->mailbox = new Mailbox($this->getPath(), $username, $password, null, $encoding);
+			$path = $this->getPath();
+			if($path == '{imap.gmail.com:993/imap/ssl}'){
+				$path = '{imap.gmail.com:993/imap/ssl/novalidate-cert}';
+			}
 
-			$this->mailbox->setTimeouts(0);
+            $this->mailbox = new Mailbox($path, $username, $password, null, $encoding);
+
+			$this->mailbox->setTimeouts(15);
 			$this->mailbox->setAttachmentsIgnore(true);
-
 			$this->mailbox->checkMailbox();
+
 		} catch (Throwable $exception) {
-			throw new InvalidCredentialsException('', 0, $exception);
+			throw new InvalidCredentialsException('[skip]'.$exception->getMessage(), 0, $exception);
 		}
 	}
 
