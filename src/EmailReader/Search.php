@@ -55,7 +55,7 @@ class Search
 	 * @param bool $markAsSeen
 	 * @return \PhpImap\IncomingMail[]
 	 */
-	public function get(bool $markAsSeen = false): array
+	public function get(bool $markAsSeen = false)
 	{
 		try {
 			$criteriaText = $this->getCriteriaText();
@@ -75,9 +75,9 @@ class Search
 				$mailIds = imap_search($stream, $criteriaText, SE_UID, 'UTF-8') ?: [];
 			}
 
-			return array_map(function (int $mailId) use ($markAsSeen) {
-				return $this->mailbox->getMail($mailId, $markAsSeen);
-			}, $mailIds);
+			foreach ($mailIds as $mailId) {
+                yield $this->mailbox->getMail($mailId, $markAsSeen);
+            }
 		} catch (Throwable $exception) {
 			return [];
 		}
